@@ -61,6 +61,7 @@ def calculate_confidence(data):
 
     st.info(f"🔍 Confidence: {confidence} מתוך {total_indicators}")
     return round((confidence / total_indicators) * 100)
+
 def predict_next_price(data):
     data = data.reset_index()
     data['Timestamp'] = pd.to_datetime(data['Datetime']).astype(int) / 10**9
@@ -71,6 +72,7 @@ def predict_next_price(data):
     predicted_price = model.predict([[next_timestamp]])[0]
     return predicted_price
 
+# נכסים
 stocks = {
     'נאסד"ק (NASDAQ)': '^IXIC',
     'S&P 500': '^GSPC',
@@ -82,6 +84,7 @@ stocks = {
     "את'ריום (Ethereum)": 'ETH-USD'
 }
 
+# טווחי זמן
 intervals = {
     '1 דקה': '1m',
     '5 דקות': '5m',
@@ -92,6 +95,7 @@ intervals = {
     'שבוע': '1wk'
 }
 
+# ממשק Streamlit
 st.set_page_config(page_title="חיזוי לעתיד - זהב, מניות וקריפטו", layout="centered")
 st.title("📈 תחזית חכמה עם חיזוי עתידי")
 st.write("בחר נכס, טווח זמן וסכום השקעה - ותקבל תחזית עם חיזוי למחיר בעוד חצי שעה.")
