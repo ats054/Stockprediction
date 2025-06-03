@@ -12,19 +12,22 @@ def calculate_confidence(data):
     confidence = 0
     total_indicators = 3
 
+    # === SMA ===
     try:
         data['SMA5'] = data['Close'].rolling(window=5).mean()
         data['SMA20'] = data['Close'].rolling(window=20).mean()
         sma5 = data['SMA5'].iloc[-1]
         sma20 = data['SMA20'].iloc[-1]
+        st.text(f"SMA5 type: {type(sma5)}, value: {sma5}")
+        st.text(f"SMA20 type: {type(sma20)}, value: {sma20}")
         sma5 = sma5.item() if hasattr(sma5, 'item') else sma5
         sma20 = sma20.item() if hasattr(sma20, 'item') else sma20
-        st.text(f"SMA5: {sma5}, SMA20: {sma20}")
         if pd.notna(sma5) and pd.notna(sma20) and float(sma5) > float(sma20):
             confidence += 1
     except Exception as e:
         st.error(f"שגיאת SMA: {e}")
 
+    # === RSI ===
     try:
         delta = data['Close'].diff()
         gain = delta.where(delta > 0, 0).rolling(window=14).mean()
@@ -32,13 +35,14 @@ def calculate_confidence(data):
         RS = gain / loss
         RSI = 100 - (100 / (1 + RS))
         rsi_value = RSI.iloc[-1]
+        st.text(f"RSI type: {type(rsi_value)}, value: {rsi_value}")
         rsi_value = rsi_value.item() if hasattr(rsi_value, 'item') else rsi_value
-        st.text(f"RSI: {rsi_value}")
         if pd.notna(rsi_value) and float(rsi_value) < 70:
             confidence += 1
     except Exception as e:
         st.error(f"שגיאת RSI: {e}")
 
+    # === MACD ===
     try:
         exp1 = data['Close'].ewm(span=12, adjust=False).mean()
         exp2 = data['Close'].ewm(span=26, adjust=False).mean()
@@ -46,17 +50,17 @@ def calculate_confidence(data):
         signal = macd.ewm(span=9, adjust=False).mean()
         macd_val = macd.iloc[-1]
         signal_val = signal.iloc[-1]
+        st.text(f"MACD type: {type(macd_val)}, value: {macd_val}")
+        st.text(f"Signal type: {type(signal_val)}, value: {signal_val}")
         macd_val = macd_val.item() if hasattr(macd_val, 'item') else macd_val
         signal_val = signal_val.item() if hasattr(signal_val, 'item') else signal_val
-        st.text(f"MACD: {macd_val}, Signal: {signal_val}")
         if pd.notna(macd_val) and pd.notna(signal_val) and float(macd_val) > float(signal_val):
             confidence += 1
     except Exception as e:
         st.error(f"שגיאת MACD: {e}")
 
-    st.info(f"Confidence: {confidence} מתוך {total_indicators}")
+    st.info(f"🔍 Confidence: {confidence} מתוך {total_indicators}")
     return round((confidence / total_indicators) * 100)
-
 def predict_next_price(data):
     data = data.reset_index()
     data['Timestamp'] = pd.to_datetime(data['Datetime']).astype(int) / 10**9
